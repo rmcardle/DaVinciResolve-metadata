@@ -240,6 +240,7 @@ exifAttributes = {
   'DaylightSavings',
   'DeviceManufacturer',
   'DeviceModelName',
+  'ExposureTimes',
   'FieldOfView',
   'FileName',
   'FilterEffect',
@@ -248,6 +249,7 @@ exifAttributes = {
   'GPSCoordinates',
   'HueAdjustment',
   'ISO',
+  'ISOSpeeds',
   'Lens',
   'LensSpec',
   'LensType',
@@ -273,6 +275,15 @@ exifAttributes = {
 
 function ConvertDate(date)
   return date:gsub('(%d+):(%d+):(%d+) (%d+:%d+:%d+)','%1-%2-%3 %4')
+end
+
+function GetFirstInList(str)
+    local s = string.find(str, " ")
+    if s then
+        return string.sub(str, 1, s - 1)
+    else
+        return str
+    end
 end
 
 -- disable comboBox when checkBox is not checked
@@ -383,6 +394,8 @@ function fetchMeta(file, exifs, argfile, exiftool, cnt, extemd)
     elseif string.match(v, '.*FileName.*') ~= nil then
       mod = values[i]:match('(.+)%..+$')
       if mod ~= nil then t[v] = mod end
+    elseif string.match(v, 'ExposureTimes') ~= nil or string.match(v, 'ISOSpeeds')  ~= nil then
+      t[v] = GetFirstInList(values[i])
     else
       t[v] = values[i]
     end
