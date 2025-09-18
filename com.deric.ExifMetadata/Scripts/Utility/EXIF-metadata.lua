@@ -564,12 +564,15 @@ function updateMetadata(clips, exifs, noop)
           -- use attribute name from checkbox label
           local val = meta[attr['combo'].CurrentText]
           if val ~= nil then
-            if noop then
-              log(attr['check'].Text .. ': ' .. clip:GetMetadata(attr['check'].Text) .. ' -> ' .. val)
-            else
-              -- actually update attributes
-              log(attr['check'].Text.. ' : '.. val)
-              clip:SetMetadata(attr['check'].Text, val)
+            local currentVal = clip:GetMetadata(attr['check'].Text)
+            if currentVal ~= val then
+              if noop then
+                log(attr['check'].Text .. ': ' .. currentVal .. ' -> ' .. val)
+              else
+                -- actually update attributes
+                log(attr['check'].Text.. ' : '.. val)
+                clip:SetMetadata(attr['check'].Text, val)
+              end
             end
           end
         end
