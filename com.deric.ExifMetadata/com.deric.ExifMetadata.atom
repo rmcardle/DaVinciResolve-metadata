@@ -25,6 +25,6 @@ sudo apt install libimage-exiftool-perl
 	},
 
 	Deploy = {
-		"Scripts/Comp/EXIF-metadata.lua",
+		"Scripts/Utility/EXIF-metadata.lua",
 	},
 }

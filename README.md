@@ -22,9 +22,9 @@ Tested on:
 
 Copy the lua script file to following paths:
 
-* Linux: `~/.local/share/DaVinciResolve/Fusion/Scripts/Comp`
-* macOS `~/Library/Application Support/Blackmagic\ Design/DaVinci\ Resolve/Fusion/Scripts/Comp`
-* Windows `%AppData%\Blackmagic Design\DaVinci Resolve\Support\Fusion\Scripts\Comp`
+* Linux: `~/.local/share/DaVinciResolve/Fusion/Scripts/Utility`
+* macOS `~/Library/Application Support/Blackmagic\ Design/DaVinci\ Resolve/Fusion/Scripts/Utility`
+* Windows `%AppData%\Blackmagic Design\DaVinci Resolve\Support\Fusion\Scripts\Utility`
 
 ### Linux
 
@@ -32,14 +32,14 @@ From command line:
 
 Linux
 ```
-wget https://raw.githubusercontent.com/deric/DaVinciResolve-metadata/main/com.deric.ExifMetadata/Scripts/Comp/EXIF-metadata.lua \
--P ~/.local/share/DaVinciResolve/Fusion/Scripts/Comp/
+wget https://raw.githubusercontent.com/deric/DaVinciResolve-metadata/main/com.deric.ExifMetadata/Scripts/Utility/EXIF-metadata.lua \
+-P ~/.local/share/DaVinciResolve/Fusion/Scripts/Utility/
 ```
 
 MacOS
 
 ```
-wget https://raw.githubusercontent.com/deric/DaVinciResolve-metadata/main/com.deric.ExifMetadata/Scripts/Comp/EXIF-metadata.lua \ -P ~/Library/Application\ Support/Blackmagic\ Design/DaVinci\ Resolve/Fusion/Scripts/Comp
+wget https://raw.githubusercontent.com/deric/DaVinciResolve-metadata/main/com.deric.ExifMetadata/Scripts/Utility/EXIF-metadata.lua \ -P ~/Library/Application\ Support/Blackmagic\ Design/DaVinci\ Resolve/Fusion/Scripts/Utility
 ```
 
 ## Usage
