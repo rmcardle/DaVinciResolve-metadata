@@ -275,29 +275,40 @@ function ConvertDate(date)
   return date:gsub('(%d+):(%d+):(%d+) (%d+:%d+:%d+)','%1-%2-%3 %4')
 end
 
--- Convert the shutter speed from a fraction to a decimal
-function ConvertShutterSpeed(str)
-  if str == nil or str == '' then
-    return ''
+-- Convert the shutter speed from a fraction to a decimal and an angle
+function ConvertShutterSpeed(shutterSpeed, frameRate)
+  local shutterDecimal = nil
+  local shutterAngle = nil
+
+  if shutterSpeed ~= nil then
+    shutterDecimal = tonumber(shutterSpeed) -- already a decimal?
+    if shutterDecimal == nil then
+      local numerator, denominator = shutterSpeed:match("^(%d+)/(%d+)$")
+      if numerator ~= nil and denominator ~= nil then
+        numerator = tonumber(numerator)
+        denominator = tonumber(denominator)
+        if denominator ~= 0 then
+          shutterDecimal = numerator / denominator
+        end
+      end
+    end
+
+    frameRate = tonumber(frameRate)
+    if shutterDecimal ~= nil and frameRate ~= nil and frameRate ~= 0 then
+      shutterAngle = 360 * (shutterDecimal / (1 / frameRate))
+    end
   end
 
-  -- Already a decimal?
-  if tonumber(str) ~= nil then
-    return str
-  end
+  if shutterDecimal ~= nil then shutterDecimal = tostring(shutterDecimal) end
+  if shutterAngle ~= nil then shutterAngle = tostring(round(shutterAngle, 1)) end
 
-  local numerator, denominator = str:match("^(%d+)/(%d+)$")
-  if numerator == nil or denominator == nil then
-    return str
-  end
+  return shutterDecimal, shutterAngle
+end
 
-  numerator = tonumber(numerator)
-  denominator = tonumber(denominator)
-  if denominator == 0 then
-    return str
-  end
-  
-  return tostring(numerator / denominator)
+-- http://lua-users.org/wiki/SimpleRound
+function round(num, numDecimalPlaces)
+  local mult = 10^(numDecimalPlaces or 0)
+  return math.floor(num * mult + 0.5) / mult
 end
 
 function GetFirstInList(str)
@@ -422,10 +433,25 @@ function fetchMeta(file, exifs, argfile, exiftool, cnt, extemd)
     else
       t[v] = values[i]
     end
-    if v == 'ShutterSpeed' or v == 'ExposureTimes' then
-      t[v] = ConvertShutterSpeed(t[v])
-    end
   end
+
+  if t['ISO'] == nil then t['ISO'] = t['ISOSpeeds'] end
+
+  local shutterSpeed = nil
+  if t['ShutterSpeed'] ~= nil then
+    shutterSpeed = t['ShutterSpeed']
+  elseif t['ExposureTimes'] ~= nil then
+    shutterSpeed = t['ExposureTimes']
+  end
+
+  local frameRate = nil
+  if t['FrameRate'] ~= nil then
+    frameRate = t['FrameRate']
+  elseif t['VideoFrameRate'] ~= nil then
+    frameRate = t['VideoFrameRate']
+  end
+
+  t['ShutterSpeed'], t['ShutterAngle'] = ConvertShutterSpeed(shutterSpeed, frameRate)
 
   print(inspect(t))
 
@@ -500,6 +526,10 @@ function CollectRequiredExifs()
       elseif t[j] == 'ShutterSpeed' then
         j = j + 1
         t[j] = 'ExposureTimes'
+        j = j + 1
+        t[j] = 'FrameRate' -- needed to calculate shutter angle
+        j = j + 1
+        t[j] = 'VideoFrameRate'
       end
       j = j + 1
     end
@@ -609,24 +639,9 @@ function updateMetadata(clips, exifs, noop)
         if attr['check'].Checked then
           -- use attribute name from checkbox label
           local val = meta[attr['combo'].CurrentText]
-          if val == nil then
-            if attr['combo'].CurrentText == 'ISO' then
-              val = meta['ISOSpeeds']
-            elseif attr['combo'].CurrentText == 'ShutterSpeed' then
-              val = meta['ExposureTimes']
-            end
-          end
-          if val ~= nil then
-            local currentVal = clip:GetMetadata(attr['check'].Text)
-            if currentVal ~= val then
-              if noop then
-                log(attr['check'].Text .. ': ' .. currentVal .. ' -> ' .. val)
-              else
-                -- actually update attributes
-                log(attr['check'].Text.. ' : '.. val)
-                clip:SetMetadata(attr['check'].Text, val)
-              end
-            end
+          SetClipMetadataValue(clip, attr['check'].Text, val)
+          if attr['combo'].CurrentText == 'ShutterSpeed' then
+            SetClipMetadataValue(clip, 'Shutter Angle', meta['ShutterAngle'])
           end
         end
       end
@@ -644,6 +659,21 @@ function updateMetadata(clips, exifs, noop)
     log("(Cancelled) Processed " .. cnt .. " media pool files")
   else
     log("(done) Processed " .. cnt .. " media pool files")
+  end
+end
+
+function SetClipMetadataValue(clip, key, val)
+  if val ~= nil then -- don't erase existing metadata
+    local currentVal = clip:GetMetadata(key)
+    if currentVal ~= val then
+      if noop then
+        log(key .. ': ' .. currentVal .. ' -> ' .. val)
+      else
+        -- actually update attributes
+        log(key.. ' : '.. val)
+        clip:SetMetadata(key, val)
+      end
+    end
   end
 end
 
