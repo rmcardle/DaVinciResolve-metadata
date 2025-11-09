@@ -277,6 +277,31 @@ function ConvertDate(date)
   return date:gsub('(%d+):(%d+):(%d+) (%d+:%d+:%d+)','%1-%2-%3 %4')
 end
 
+-- Convert the shutter speed from a fraction to a decimal
+function ConvertShutterSpeed(str)
+  if str == nil or str == '' then
+    return ''
+  end
+
+  -- Already a decimal?
+  if tonumber(str) ~= nil then
+    return str
+  end
+
+  local numerator, denominator = str:match("^(%d+)/(%d+)$")
+  if numerator == nil or denominator == nil then
+    return str
+  end
+
+  numerator = tonumber(numerator)
+  denominator = tonumber(denominator)
+  if denominator == 0 then
+    return str
+  end
+  
+  return numerator / denominator
+end
+
 function GetFirstInList(str)
     local s = string.find(str, " ")
     if s then
@@ -398,6 +423,9 @@ function fetchMeta(file, exifs, argfile, exiftool, cnt, extemd)
       t[v] = GetFirstInList(values[i])
     else
       t[v] = values[i]
+    end
+    if v == 'ShutterSpeed' or v == 'ExposureTimes' then
+      t[v] = ConvertShutterSpeed(t[v])
     end
   end
 
