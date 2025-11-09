@@ -394,7 +394,7 @@ function fetchMeta(file, exifs, argfile, exiftool, cnt, extemd)
     elseif string.match(v, '.*FileName.*') ~= nil then
       mod = values[i]:match('(.+)%..+$')
       if mod ~= nil then t[v] = mod end
-    elseif string.match(v, 'ExposureTimes') ~= nil or string.match(v, 'ISOSpeeds')  ~= nil then
+    elseif v == 'ExposureTimes' or v == 'ISOSpeeds' then
       t[v] = GetFirstInList(values[i])
     else
       t[v] = values[i]
