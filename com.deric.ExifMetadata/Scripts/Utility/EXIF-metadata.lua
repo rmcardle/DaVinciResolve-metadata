@@ -240,7 +240,6 @@ exifAttributes = {
   'DaylightSavings',
   'DeviceManufacturer',
   'DeviceModelName',
-  'ExposureTimes',
   'FieldOfView',
   'FileName',
   'FilterEffect',
@@ -249,7 +248,6 @@ exifAttributes = {
   'GPSCoordinates',
   'HueAdjustment',
   'ISO',
-  'ISOSpeeds',
   'Lens',
   'LensSpec',
   'LensType',
@@ -496,6 +494,13 @@ function CollectRequiredExifs()
   for i, attr in ipairs(exifBoxes) do
     if attr['check'].Checked then
       t[j] = attr['combo'].CurrentText
+      if t[j] == 'ISO' then
+        j = j + 1
+        t[j] = 'ISOSpeeds'
+      elseif t[j] == 'ShutterSpeed' then
+        j = j + 1
+        t[j] = 'ExposureTimes'
+      end
       j = j + 1
     end
   end
@@ -604,6 +609,13 @@ function updateMetadata(clips, exifs, noop)
         if attr['check'].Checked then
           -- use attribute name from checkbox label
           local val = meta[attr['combo'].CurrentText]
+          if val == nil then
+            if attr['combo'].CurrentText == 'ISO' then
+              val = meta['ISOSpeeds']
+            elseif attr['combo'].CurrentText == 'ShutterSpeed' then
+              val = meta['ExposureTimes']
+            end
+          end
           if val ~= nil then
             local currentVal = clip:GetMetadata(attr['check'].Text)
             if currentVal ~= val then
