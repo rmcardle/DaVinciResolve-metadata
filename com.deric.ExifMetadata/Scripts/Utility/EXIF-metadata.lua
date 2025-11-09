@@ -299,7 +299,7 @@ function ConvertShutterSpeed(str)
     return str
   end
   
-  return numerator / denominator
+  return tostring(numerator / denominator)
 end
 
 function GetFirstInList(str)
